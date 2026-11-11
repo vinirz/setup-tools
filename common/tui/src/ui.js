@@ -20,8 +20,10 @@ export const ui = {
     warn: (message) => clack.log.warn(message),
     error: (message) => clack.log.error(message),
     step: (message) => clack.log.step(message),
+    note: (message, title) => clack.note(message, title),
     spinner: () => clack.spinner(),
     confirm: async (message, initialValue = true) => unwrap(await clack.confirm({ message, initialValue })),
+    text: async (message, initialValue = '') => unwrap(await clack.text({ message, initialValue })),
     select: async (message, options) => unwrap(await clack.select({ message, options })),
     multiselect: async (message, options) => unwrap(await clack.multiselect({ message, options, required: false })),
 };

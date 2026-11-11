@@ -5,7 +5,7 @@ const ERROR_OUTPUT_LINES = 15;
 /**
  * @typedef {object} Step
  * @property {string} title
- * @property {(context: object) => Promise<void>} run
+ * @property {(context: { ui: object }) => Promise<void>} run
  * @property {(context: object) => Promise<boolean>} [skip]  true = pular a etapa
  * @property {boolean} [interactive]  true = sem spinner (a etapa usa o terminal, ex.: sudo)
  * @property {boolean} [optional]  true = se falhar, avisa e segue para a proxima etapa
@@ -39,15 +39,16 @@ async function runStep(step, context, ui) {
 
 /**
  * Executa as etapas em ordem; para na primeira falha.
- * @param {{ title: string, steps: Step[], context?: object }} pipeline
+ * @param {{ title: string, steps: Step[], context?: object, successMessage?: string }} pipeline
  * @param {object} [ui] interface injetavel
  * @returns {Promise<{ ok: boolean, failedStep?: string }>}
  */
-export async function runPipeline({ title, steps, context = {} }, ui = defaultUi) {
+export async function runPipeline({ title, steps, context = {}, successMessage = 'Tudo pronto.' }, ui = defaultUi) {
+    const stepContext = { ui, ...context };
     ui.intro(title);
     for (const step of steps) {
         try {
-            await runStep(step, context, ui);
+            await runStep(step, stepContext, ui);
         } catch (error) {
             if (step.optional) {
                 ui.warn(`${step.title}: ${tailLines(error.output) || error.message} (etapa opcional, seguindo)`);
@@ -58,6 +59,6 @@ export async function runPipeline({ title, steps, context = {} }, ui = defaultUi
             return { ok: false, failedStep: step.title };
         }
     }
-    ui.outro('Tudo pronto.');
+    ui.outro(successMessage);
     return { ok: true };
 }

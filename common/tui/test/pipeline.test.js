@@ -95,3 +95,21 @@ test('etapa opcional que falha avisa e nao interrompe a pipeline', async () => {
     assert.equal(result.ok, true);
     assert.ok(ui.events.some((e) => e.startsWith('warn:A: indisponivel')));
 });
+
+test('as etapas recebem a interface (ui) no contexto', async () => {
+    const ui = fakeUi();
+    let received;
+    const steps = [{ title: 'A', run: async (ctx) => { received = ctx.ui; } }];
+
+    await runPipeline({ title: 'P', steps }, ui);
+
+    assert.equal(received, ui);
+});
+
+test('usa a mensagem final personalizada', async () => {
+    const ui = fakeUi();
+
+    await runPipeline({ title: 'P', steps: [], successMessage: 'Feito!' }, ui);
+
+    assert.ok(ui.events.includes('outro:Feito!'));
+});
