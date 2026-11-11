@@ -11,8 +11,13 @@ function unwrap(value) {
     return value;
 }
 
+const hasTerminal = Boolean(process.stdin.isTTY && process.stdout.isTTY);
+
 /** Interface padrao da TUI. Pipelines recebem esta interface por injecao (facilita testes). */
 export const ui = {
+    interactive: hasTerminal,
+    message: (message) => clack.log.message(message),
+    guide: (lines) => clack.note(lines.join('\n'), 'O que fazer'),
     intro: (title) => clack.intro(pc.inverse(` ${title} `)),
     outro: (message) => clack.outro(message),
     info: (message) => clack.log.info(message),

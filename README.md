@@ -8,12 +8,13 @@ Pipelines de setup de ambiente, com uma TUI em Node compartilhada.
 setup-pipelines/
 ├── common/                      codigo compartilhado entre as pipelines
 │   ├── bootstrap/
-│   │   └── ensure-node.sh       bash puro: garante Node (via nvm) antes da TUI
+│   │   ├── ensure-node.sh       bash puro: garante Node (via nvm) antes da TUI
+│   │   └── launch.sh            garante Node + dependencias da TUI e executa a pipeline
 │   └── tui/                     TUI em Node (@clack/prompts)
-│       ├── src/                 shell.js, ui.js, pipeline.js, index.js
+│       ├── src/                 shell.js, ui.js, pipeline.js, checklist.js, fs.js, index.js
 │       └── test/                npm test
 ├── zsh/                         pipeline: zsh + oh-my-zsh + spaceship + Node (bash)
-├── suite-dev/                   pipeline do ambiente suite-dev (a criar)
+├── suite-dev/                   pipeline do ambiente suite-dev (ver suite-dev/README.md)
 └── avuei-dev/                   (futuro)
 ```
 
@@ -68,3 +69,12 @@ await runPipeline({
 
 `run()` captura a saida e so a mostra se o comando falhar. A pipeline para na primeira falha.
 A interface (`ui`) e injetavel em `runPipeline(pipeline, ui)`, o que permite testar sem terminal.
+
+## Dois estilos de pipeline
+
+| Estilo | Quando usar | API |
+|---|---|---|
+| `runPipeline` | Sequencia de etapas (instalar, escrever, verificar). Para na primeira falha. | `steps: [{ title, run, skip, interactive, optional }]` |
+| `runChecklist` | Diagnostico com correcao opcional (modo `--check`, resumo final, "explica e espera"). | `sections: [{ title, why, run(runner) }]`, itens `{ label, level, check, fix, guide, autoConfirm }` |
+
+`run()` aceita `stream: true` (mostra a saida em tempo real e a captura), `interactive: true` (herda o terminal) e `timeoutMs`.
