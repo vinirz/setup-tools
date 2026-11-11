@@ -31,8 +31,14 @@ setup-pipelines/
 ./common/bootstrap/ensure-node.sh
 ```
 
-Se o Node for >= 22 (`MIN_NODE_MAJOR`), nao faz nada. Senao instala curl e git (apt), o nvm
-`v0.39.5` e o Node `lts/*`. Variaveis: `MIN_NODE_MAJOR`, `NODE_VERSION`, `NVM_RELEASE`.
+Se o Node for >= 22 (`MIN_NODE_MAJOR`) e executar, nao faz nada. Senao:
+
+1. instala via apt o que faltar: `curl`, `git`, `xz-utils` e `libatomic1` (os binarios do Node precisam dela);
+2. instala o nvm `v0.39.5` (saida silenciosa; so aparece se falhar);
+3. instala o Node `lts/*` pelo nvm e o define como padrao.
+
+Um Node que existe mas nao executa (biblioteca faltando) conta como ausente. Variaveis:
+`MIN_NODE_MAJOR`, `NODE_VERSION`, `NVM_RELEASE`.
 
 ## TUI (`common/tui`)
 

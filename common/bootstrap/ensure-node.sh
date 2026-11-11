@@ -15,25 +15,41 @@ die()  { warn "$*"; exit 1; }
 
 nvm_dir() { printf '%s' "${NVM_DIR:-$HOME/.nvm}"; }
 
+# Major do Node, ou 0 se o node nao existir ou nao executar (ex.: falta de biblioteca).
 node_major() {
-    command -v node >/dev/null || { echo 0; return; }
-    node --version | sed -E 's/^v([0-9]+).*/\1/'
+    local version
+    version="$(node --version 2>/dev/null)" || { echo 0; return; }
+    [[ $version =~ ^v([0-9]+) ]] && echo "${BASH_REMATCH[1]}" || echo 0
 }
 
 node_is_sufficient() { (( $(node_major) >= MIN_NODE_MAJOR )); }
 
+# Pacotes apt dos pre-requisitos que faltam (um por linha).
+missing_prerequisites() {
+    command -v curl >/dev/null || echo curl
+    command -v git  >/dev/null || echo git
+    command -v xz   >/dev/null || echo xz-utils
+    # Os binarios oficiais do Node precisam de libatomic.so.1.
+    ldconfig -p 2>/dev/null | grep -q 'libatomic\.so\.1' || echo libatomic1
+}
+
 install_prerequisites() {
-    command -v curl >/dev/null && command -v git >/dev/null && return
-    command -v apt-get >/dev/null || die 'Instale curl e git manualmente (apt nao encontrado).'
-    log 'Instalando curl e git...'
+    local -a missing
+    mapfile -t missing < <(missing_prerequisites)
+    (( ${#missing[@]} )) || return 0
+    command -v apt-get >/dev/null || die "Instale manualmente: ${missing[*]} (apt nao encontrado)."
+    log "Instalando pre-requisitos: ${missing[*]}"
     sudo apt-get update -qq
-    sudo apt-get install -y curl git
+    sudo apt-get install -y "${missing[@]}"
 }
 
 install_nvm() {
     [[ -s "$(nvm_dir)/nvm.sh" ]] && return
     log "Instalando nvm $NVM_RELEASE..."
-    curl -fsSL "$NVM_INSTALL_URL" | PROFILE=/dev/null bash
+    local output
+    # PROFILE=/dev/null: o ~/.zshrc do template ja carrega o nvm.
+    output="$(curl -fsSL "$NVM_INSTALL_URL" | PROFILE=/dev/null bash 2>&1)" \
+        || { printf '%s\n' "$output" >&2; die 'Falha ao instalar o nvm.'; }
 }
 
 load_nvm() {
@@ -60,7 +76,7 @@ ensure_node() {
     install_prerequisites
     install_nvm
     install_node
-    node_is_sufficient || die "Node insuficiente apos a instalacao (minimo: v$MIN_NODE_MAJOR)."
+    node_is_sufficient || die "Node indisponivel apos a instalacao (minimo: v$MIN_NODE_MAJOR). Rode: node --version"
     log "Node $(node --version) pronto."
 }
 
