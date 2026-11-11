@@ -1,0 +1,17 @@
+# Ajustes pessoais desta maquina. Copiado para ~/.zshrc.local pelo instalador (so se nao existir)
+# e carregado no final do ~/.zshrc.
+
+# ===== VARIAVEIS E PATH =====
+
+export AWS_DEFAULT_REGION=us-east-1
+
+# ===== ALIASES =====
+
+alias back="cd ~/projects/proj-backend"
+alias front="cd ~/projects/proj-frontend"
+
+# ===== PASEO =====
+
+if command -v paseo >/dev/null && ! pgrep -f "paseo" >/dev/null; then
+  nohup paseo >/dev/null 2>&1 &
+fi

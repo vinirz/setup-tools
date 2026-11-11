@@ -1,0 +1,14 @@
+{
+  "name": "@setup/tui",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "TUI compartilhada pelas pipelines de setup.",
+  "main": "src/index.js",
+  "engines": { "node": ">=22" },
+  "scripts": { "test": "node --test" },
+  "dependencies": {
+    "@clack/prompts": "1.9.0",
+    "picocolors": "1.1.1"
+  }
+}
